@@ -1,5 +1,6 @@
 import os
 import sys
+import argparse
 from pathlib import Path
 import praw
 import json
@@ -10,6 +11,11 @@ config = json.load(open('config.json', 'r'))
 reddit = praw.Reddit(client_id=config['clientId'],
                      client_secret=config['clientSecret'],
                      user_agent=config['userAgent'])
+
+TITLE_MAX_LENGHT = 200
+TIME_FILTER = ['all', 'day', 'hour', 'month', 'week', 'year']
+DEFAULT_LIMIT = 10
+DEFAULT_TIME_FILTER = 'all'
 
 def create_download_folder():
   p = Path(f'./download')
@@ -24,18 +30,18 @@ def replace_reserved_characters(title):
   return new_title
 
 def shorten_title(title):
-  if len(title) > 200:
-    return title[:200]
+  if len(title) > TITLE_MAX_LENGHT:
+    return title[:TITLE_MAX_LENGHT]
   return title
 
-def main(limit=10):
+def download_content(limit, time):
   create_download_folder()
 
   subreddits = json.load(open('subreddits.json', 'r'))
 
   for subreddit in subreddits:
     sub = reddit.subreddit(subreddit)
-    for submission in sub.top(limit=limit):
+    for submission in sub.top(time, limit=limit):
       title = replace_reserved_characters(submission.title)
       title = shorten_title(title)
 
@@ -63,10 +69,29 @@ def main(limit=10):
             file_extension = url.split('.')[-1]
             urllib.request.urlretrieve(url, f'./download/{sub.display_name}/{title}.{file_extension}')
 
-if len(sys.argv) > 1:
-  try:
-    main(int(sys.argv[1]))
-  except ValueError:
-    print('Please enter an integer as limit')
-else:
-  main()
+def get_arguments():
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-l','--limit', help='Limit of results', required=False)
+  parser.add_argument('-t','--time', help='Time filter for top, can be one of: all, day, hour, month, week, year (default: all).', required=False)
+  return vars(parser.parse_args())
+
+def main():
+  limit = DEFAULT_LIMIT
+  time = DEFAULT_TIME_FILTER
+
+  args = get_arguments()
+
+  if args['time'] in TIME_FILTER:
+    time = args['time']
+  elif args['time'] is not None:
+    raise ValueError('Please specify a correct time value. Can be one of: all, day, hour, month, week, year (default: all).')
+
+  if args['limit'] is not None:
+    try:
+      limit = int(args['limit'])
+    except ValueError:
+      raise
+
+  download_content(limit, time)
+
+main()

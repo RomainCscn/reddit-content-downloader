@@ -1,12 +1,12 @@
 # Reddit content downloader
 
-A python program to download content (images and videos) of multiples subreddits.
+A python program to download content (images and videos) of multiples subreddits (sorted by *top*).
 
 ## Prerequisites
 
-- install [ffmpeg](https://ffmpeg.org)
+- Install [ffmpeg](https://ffmpeg.org)
 
-Run `pip install -r requirements.txt` to install dependencies.
+Run `pip install -r requirements.txt` to install project dependencies.
 
 ## Configuration
 
@@ -20,8 +20,14 @@ Finally, add your subreddits in the `subreddits.sample.json` file and save the f
 
 ## Run
 
-Use `python main.py` to run the script and download subreddits content. This will create a `download/` folder and a folder for each subreddits.
+Use `python main.py` to run the script and download the top subreddits content. This will create a `download/` folder and a folder for each subreddits.
 
-You can specify a limit for each subreddit using the command `python main.py <LIMIT>` where `<LIMIT>` is an integer. 
+Two arguments are available: limit (`-l`) and time (`-t`).
 
-This command `python main.py 3` will only download the first top 3 posts.
+Use as below:
+
+`python main.py -l <LIMIT> -t <TIME_FILTER>`
+
+where `<LIMIT>` is an integer and `<TIME_FILTER>`is one of the following values: *all*, *day*, *hour*, *month*, *week*, *year* (default: *all*). Arguments are optional, default values are *10* for the download limit and *all* for the time filter.
+
+Example: this command `python main.py -l 3 -t week` will download the top 3 posts content of the week.
