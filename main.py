@@ -75,22 +75,28 @@ def get_arguments():
   parser.add_argument('-t','--time', help='Time filter for top, can be one of: all, day, hour, month, week, year (default: all).', required=False)
   return vars(parser.parse_args())
 
-def main():
+def get_limit_arg(args):
   limit = DEFAULT_LIMIT
-  time = DEFAULT_TIME_FILTER
-
-  args = get_arguments()
-
-  if args['time'] in TIME_FILTER:
-    time = args['time']
-  elif args['time'] is not None:
-    raise ValueError('Please specify a correct time value. Can be one of: all, day, hour, month, week, year (default: all).')
-
   if args['limit'] is not None:
     try:
       limit = int(args['limit'])
     except ValueError:
       raise
+  return limit
+
+def get_time_arg(args):
+  time = DEFAULT_TIME_FILTER
+  if args['time'] in TIME_FILTER:
+    time = args['time']
+  elif args['time'] is not None:
+    raise ValueError('Please specify a correct time value. Can be one of: all, day, hour, month, week, year (default: all).')
+  return time
+
+def main():
+  args = get_arguments()
+
+  limit = get_limit_arg(args)
+  time = get_time_arg(args)
 
   download_content(limit, time)
 
