@@ -1,11 +1,12 @@
 import os
 import sys
 import argparse
-from pathlib import Path
 import praw
 import json
 import youtube_dl
 import urllib.request
+from pathlib import Path
+from PIL import Image
 
 config = json.load(open('config.json', 'r'))
 reddit = praw.Reddit(client_id=config['clientId'],
@@ -92,12 +93,30 @@ def get_time_arg(args):
     raise ValueError('Please specify a correct time value. Can be one of: all, day, hour, month, week, year (default: all).')
   return time
 
+def is_image_similar(image1, image2):
+    return open(image1,"rb").read() == open(image2,"rb").read()
+
+def is_image(image):
+  try:
+    Image.open(image)
+  except IOError:
+    return False
+  return True
+
+def remove_unexisting_images():
+  for directory in os.scandir('./download'): 
+    if 'DS_Store' not in directory.path:
+      for image in os.scandir(directory.path):
+        if is_image(image.path) and is_image_similar('./empty_image', image.path):
+          os.remove(image.path)
+          print(f'=== Removed {image.path} as it was no longer available ===')
+
 def main():
   args = get_arguments()
-
   limit = get_limit_arg(args)
   time = get_time_arg(args)
 
   download_content(limit, time)
+  remove_unexisting_images()
 
 main()
