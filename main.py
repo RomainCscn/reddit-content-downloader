@@ -24,7 +24,7 @@ def create_download_folder():
     os.makedirs(f'./download')
 
 def replace_reserved_characters(title):
-  characters = (('<', ''), ('>', ''), (':', ''), ('r/', ''), ('\\', ''), ('|', ''), ('*', ''), ('?', ''), ('%', ''))
+  characters = (('<', ''), ('>', ''), (':', ''), ('r/', ''), ('/', ''), ('\\', ''), ('|', ''), ('*', ''), ('?', ''), ('%', ''))
   new_title = title
   for r in characters:
     new_title = new_title.replace(*r)
@@ -35,10 +35,8 @@ def shorten_title(title):
     return title[:TITLE_MAX_LENGHT]
   return title
 
-def download_content(limit, time):
+def download_content(subreddits, limit, time):
   create_download_folder()
-
-  subreddits = json.load(open('subreddits.json', 'r'))
 
   for subreddit in subreddits:
     sub = reddit.subreddit(subreddit)
@@ -72,6 +70,7 @@ def download_content(limit, time):
 
 def get_arguments():
   parser = argparse.ArgumentParser()
+  parser.add_argument('subs', metavar='S', nargs='*', help='Subreddits, used instead of subreddits.json')
   parser.add_argument('-l','--limit', help='Limit of results', required=False)
   parser.add_argument('-t','--time', help='Time filter for top, can be one of: all, day, hour, month, week, year (default: all).', required=False)
   return vars(parser.parse_args())
@@ -92,6 +91,15 @@ def get_time_arg(args):
   elif args['time'] is not None:
     raise ValueError('Please specify a correct time value. Can be one of: all, day, hour, month, week, year (default: all).')
   return time
+
+def get_subs_arg(args):
+  subreddits = json.load(open('subreddits.json', 'r'))
+  if args['subs']:
+    try:
+      subreddits = args['subs']
+    except ValueError:
+      raise
+  return subreddits
 
 def is_image_similar(image1, image2):
     return open(image1,"rb").read() == open(image2,"rb").read()
@@ -115,8 +123,9 @@ def main():
   args = get_arguments()
   limit = get_limit_arg(args)
   time = get_time_arg(args)
+  subs = get_subs_arg(args)
 
-  download_content(limit, time)
+  download_content(subs, limit, time)
   remove_unexisting_images()
 
 main()
