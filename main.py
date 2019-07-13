@@ -144,5 +144,6 @@ def main():
 
   download_content(subs, limit, time)
   remove_unexisting_images()
+  print('=== Download finished, enjoy! ===')
 
 main()
