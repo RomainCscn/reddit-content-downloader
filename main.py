@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 import praw
+import prawcore
 import json
 import youtube_dl
 import urllib.request
@@ -17,6 +18,16 @@ TITLE_MAX_LENGHT = 200
 TIME_FILTER = ['all', 'day', 'hour', 'month', 'week', 'year']
 DEFAULT_LIMIT = 10
 DEFAULT_TIME_FILTER = 'all'
+
+class MyLogger(object):
+  def debug(self, msg):
+    print(msg)
+
+  def warning(self, msg):
+    pass
+
+  def error(self, msg):
+    pass
 
 def create_download_folder():
   p = Path(f'./download')
@@ -40,33 +51,39 @@ def download_content(subreddits, limit, time):
 
   for subreddit in subreddits:
     sub = reddit.subreddit(subreddit)
-    for submission in sub.top(time, limit=limit):
-      title = replace_reserved_characters(submission.title)
-      title = shorten_title(title)
+    try:
+      for submission in sub.top(time, limit=limit):
+        title = replace_reserved_characters(submission.title)
+        title = shorten_title(title)
 
-      ydl_opts = {
-        'download_archive': 'downloaded.txt', 
-        'outtmpl': f'./download/{sub.display_name}/{title}.%(ext)s',
-      }
-      with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        try:
-          ydl.download([submission.url])
-        except youtube_dl.utils.DownloadError as download_error:
-          if 'No media found' in str(download_error):
-            pass
-          else:
-            print('=== Downloading image ===')
-            p = Path(f'./download/{sub.display_name}')
-            if not p.exists():
-              os.makedirs(f'./download/{sub.display_name}')
-            
-            url = submission.url
-            if 'i.imgur' not in url and 'imgur' in url:
-              url = url.replace('imgur', 'i.imgur')
-              url += '.jpg'
-            
-            file_extension = url.split('.')[-1]
-            urllib.request.urlretrieve(url, f'./download/{sub.display_name}/{title}.{file_extension}')
+        ydl_opts = {
+          'download_archive': 'downloaded.txt', 
+          'outtmpl': f'./download/{sub.display_name}/{title}.%(ext)s',
+          'logger': MyLogger(),
+        }
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+          try:
+            ydl.download([submission.url])
+          except youtube_dl.utils.DownloadError as download_error:
+            if 'No media found' in str(download_error):
+              pass
+            else:
+              print('Downloading image')
+              p = Path(f'./download/{sub.display_name}')
+              if not p.exists():
+                os.makedirs(f'./download/{sub.display_name}')
+              
+              url = submission.url
+              if 'i.imgur' not in url and 'imgur' in url:
+                url = url.replace('imgur', 'i.imgur')
+                url += '.jpg'
+              
+              file_extension = url.split('.')[-1]
+              urllib.request.urlretrieve(url, f'./download/{sub.display_name}/{title}.{file_extension}')
+    except prawcore.exceptions.Redirect:
+      print(f'=== Skipping r/{sub} as it does not exist ===')
+    except:
+      print(f'=== Oops, an unexpected error as occured... ===')
 
 def get_arguments():
   parser = argparse.ArgumentParser()
