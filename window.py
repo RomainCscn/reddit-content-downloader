@@ -8,8 +8,7 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
   def __init__(self, parent=None):
     super(MainWindowRcd, self).__init__(parent)
     self.setupUi(self)
-    subredditsTest = [Subreddit("Tinder"), Subreddit("test")]
-    self.subredditTableModel = SubredditTableModel(subredditsTest)
+    self.subredditTableModel = SubredditTableModel([])
     self.treeViewSubs.setModel(self.subredditTableModel)
     self.treeViewSubs.selectionModel().selectionChanged.connect(self.on_treeViewSubs_selectionChanged)
 
@@ -23,3 +22,12 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
   def on_addButton_clicked(self):
     subreddit = Subreddit(name = self.subredditName.text())
     self.subredditTableModel.addSubreddit(subreddit)
+    self.subredditName.setText('')
+  
+  @pyqtSlot()
+  def on_deleteButton_clicked(self):
+    selectionModel = self.treeViewSubs.selectionModel()
+    indexes = selectionModel.selectedRows()
+    if len(indexes) > 0:
+      subIndex = indexes[0].row()
+      self.subredditTableModel.deleteSubreddit(subIndex)
