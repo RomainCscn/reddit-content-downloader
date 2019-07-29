@@ -1,4 +1,5 @@
 import sys
+from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from Ui_main_window_rcd import Ui_MainWindow
 from model import Subreddit, SubredditTableModel
@@ -17,3 +18,8 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
     if len(indexesSelection) > 0:
       self.indexSelection = indexesSelection[0]
       self.indexSubSelected = self.indexSelection.row()
+
+  @pyqtSlot()
+  def on_addButton_clicked(self):
+    subreddit = Subreddit(name = self.subredditName.text())
+    self.subredditTableModel.addSubreddit(subreddit)
