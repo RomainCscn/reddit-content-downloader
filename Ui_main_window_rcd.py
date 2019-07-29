@@ -84,6 +84,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.treeViewSubs = QtWidgets.QTreeView(self.widget1)
+        self.treeViewSubs.setDragDropMode(QtWidgets.QAbstractItemView.DropOnly)
         self.treeViewSubs.setObjectName("treeViewSubs")
         self.verticalLayout_2.addWidget(self.treeViewSubs)
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout()

@@ -9,7 +9,7 @@ import urllib.request
 from pathlib import Path
 from PIL import Image
 
-config = json.load(open('config.json', 'r'))
+config = json.load(open('config/config.json', 'r'))
 reddit = praw.Reddit(client_id=config['clientId'],
                      client_secret=config['clientSecret'],
                      user_agent=config['userAgent'])
@@ -50,6 +50,9 @@ def download_content(subreddits, limit, time):
   create_download_folder()
 
   for subreddit in subreddits:
+    print(subreddit)
+    print(limit)
+    print(time)
     sub = reddit.subreddit(subreddit)
     try:
       for submission in sub.top(time, limit=limit):
@@ -145,5 +148,3 @@ def main():
   download_content(subs, limit, time)
   remove_unexisting_images()
   print('=== Download finished, enjoy! ===')
-
-main()

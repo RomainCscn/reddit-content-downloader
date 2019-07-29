@@ -3,6 +3,7 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from Ui_main_window_rcd import Ui_MainWindow
 from model import Subreddit, SubredditTableModel
+from main import download_content
 
 class MainWindowRcd(QMainWindow, Ui_MainWindow):
   def __init__(self, parent=None):
@@ -31,3 +32,10 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
     if len(indexes) > 0:
       subIndex = indexes[0].row()
       self.subredditTableModel.deleteSubreddit(subIndex)
+  
+  @pyqtSlot()
+  def on_downloadButton_clicked(self):
+    limit = self.limitSpinBox.value()
+    top = self.topComboBox.currentText().lower()
+    subreddits = list(map(lambda s : s.name, self.subredditTableModel.subreddits))
+    download_content(subreddits, limit, top)
