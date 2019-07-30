@@ -68,6 +68,8 @@ def remove_unexisting_images():
 
 class DownloadThread(QThread):
   content_downloaded = pyqtSignal(int)
+  sub_not_found = pyqtSignal(str)
+  download_completed = pyqtSignal()
 
   def __init__(self, subreddits, limit, top):
     self.subreddits = subreddits
@@ -124,7 +126,9 @@ class DownloadThread(QThread):
                 self.content_downloaded.emit(download_index)
       except prawcore.exceptions.Redirect:
         download_index = 0
+        self.sub_not_found.emit(subreddit)
         print(f'=== Skipping r/{sub} as it does not exist ===')
       except:
         download_index = 0
         print(f'=== Oops, an unexpected error as occured... ===')
+    self.download_completed.emit()
