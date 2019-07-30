@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from Ui_main_window_rcd import Ui_MainWindow
 from model import Subreddit, SubredditTableModel
-from main import download_content
+from downloadThread import DownloadThread
 
 class MainWindowRcd(QMainWindow, Ui_MainWindow):
   def __init__(self, parent=None):
@@ -38,4 +38,10 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
     limit = self.limitSpinBox.value()
     top = self.topComboBox.currentText().lower()
     subreddits = list(map(lambda s : s.name, self.subredditTableModel.subreddits))
-    download_content(subreddits, limit, top)
+    self.download_thread = DownloadThread(subreddits, limit, top)
+    self.download_thread.finished.connect(self.download_thread.done)
+    self.download_thread.start()
+
+  @pyqtSlot()
+  def on_cancelButton_clicked(self):
+    self.download_thread.terminate()

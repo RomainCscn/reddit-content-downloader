@@ -1,6 +1,7 @@
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant
 from collections import namedtuple
 import json
+import asyncio
 
 Subreddit = namedtuple('Subreddit', 'name')
 
