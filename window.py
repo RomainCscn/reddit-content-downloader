@@ -39,11 +39,15 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
     top = self.topComboBox.currentText().lower()
     subreddits = list(map(lambda s : s.name, self.subredditTableModel.subreddits))
     self.download_thread = DownloadThread(subreddits, limit, top)
+    self.download_thread.content_downloaded.connect(self.onContentDownloaded)
     self.downloadButton.setEnabled(False)
     self.cancelButton.setEnabled(True)
     self.progressBar.setMaximum(len(subreddits) * limit)
     self.download_thread.finished.connect(self.download_finished)
     self.download_thread.start()
+
+  def onContentDownloaded(self, content_index):
+    self.progressBar.setValue(content_index)
 
   @pyqtSlot()
   def on_cancelButton_clicked(self):
