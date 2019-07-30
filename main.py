@@ -113,7 +113,7 @@ def get_time_arg(args):
   return time
 
 def get_subs_arg(args):
-  subreddits = json.load(open('subreddits.json', 'r'))
+  subreddits = json.load(open('./config/subreddits.json', 'r'))
   if args['subs']:
     try:
       subreddits = args['subs']

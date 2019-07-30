@@ -130,6 +130,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         self.cancelButton = QtWidgets.QPushButton(self.widget1)
+        self.cancelButton.setEnabled(False)
         self.cancelButton.setObjectName("cancelButton")
         self.horizontalLayout_4.addWidget(self.cancelButton)
         spacerItem6 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
