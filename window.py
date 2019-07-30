@@ -40,7 +40,10 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
   @pyqtSlot()
   def on_downloadButton_clicked(self):
     limit = self.limitSpinBox.value()
-    top = self.topComboBox.currentText().lower()
+    if self.topComboBox.currentText().lower() == 'all time':
+      top = 'all'
+    else:
+      top = self.topComboBox.currentText().lower()
     subreddits = list(map(lambda s : s.name, self.subredditTableModel.subreddits))
     if len(subreddits) == 0:
       QMessageBox.critical(self, "No subreddits", "You didn't enter any subreddits.", QMessageBox.Ok)
