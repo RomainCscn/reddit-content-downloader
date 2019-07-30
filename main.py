@@ -50,9 +50,6 @@ def download_content(subreddits, limit, time):
   create_download_folder()
 
   for subreddit in subreddits:
-    print(subreddit)
-    print(limit)
-    print(time)
     sub = reddit.subreddit(subreddit)
     try:
       for submission in sub.top(time, limit=limit):

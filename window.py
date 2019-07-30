@@ -41,13 +41,16 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
     self.download_thread = DownloadThread(subreddits, limit, top)
     self.downloadButton.setEnabled(False)
     self.cancelButton.setEnabled(True)
+    self.progressBar.setMaximum(len(subreddits) * limit)
     self.download_thread.finished.connect(self.download_finished)
     self.download_thread.start()
 
   @pyqtSlot()
   def on_cancelButton_clicked(self):
+    self.progressBar.setValue(0)
     self.download_thread.terminate()
 
   def download_finished(self):
     self.cancelButton.setEnabled(False)
     self.downloadButton.setEnabled(True)
+    self.progressBar.setValue(0)
