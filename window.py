@@ -1,17 +1,19 @@
 import sys
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, QSettings
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QDialog, QFileDialog
 from ui_main_window_rcd import Ui_MainWindow
 from model import Subreddit, SubredditTableModel
 from settings_window import SettingsWindow
 from downloadThread import DownloadThread
 
+settings = QSettings('Romain Cascino', 'Reddit Content Downloader')
+
 class MainWindowRcd(QMainWindow, Ui_MainWindow):
   def __init__(self, parent=None):
     super(MainWindowRcd, self).__init__(parent)
     self.setupUi(self)
+    self.set_download_folder(settings.value('download_folder', type=str))
     self.subs_not_found = []
-    self.download_folder = './download'
     self.subredditTableModel = SubredditTableModel([])
     self.treeViewSubs.setModel(self.subredditTableModel)
     self.treeViewSubs.selectionModel().selectionChanged.connect(self.on_treeViewSubs_selectionChanged)
@@ -46,8 +48,12 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
   
   @pyqtSlot()
   def on_folderButton_clicked(self):
-    self.download_folder = str(QFileDialog.getExistingDirectory(self, "Select download directory"))
-    self.download_path.setText(self.download_folder)
+    self.set_download_folder(str(QFileDialog.getExistingDirectory(self, "Select download directory")))
+
+  def set_download_folder(self, path):
+    settings.setValue('download_folder', path)
+    self.download_folder = path
+    self.download_path_text.setText(path)
 
   @pyqtSlot()
   def on_downloadButton_clicked(self):
@@ -59,6 +65,9 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
     subreddits = list(map(lambda s : s.name, self.subredditTableModel.subreddits))
     if len(subreddits) == 0:
       QMessageBox.critical(self, "No subreddits", "You didn't enter any subreddits.", QMessageBox.Ok)
+      return
+    if not hasattr(self, 'download_folder') or self.download_folder == '':
+      QMessageBox.critical(self, "No download folder", "You didn't select a download folder destination. Please select one before downloading.", QMessageBox.Ok)
       return
     self.download_thread = DownloadThread(subreddits, limit, top, self.download_folder)
     self.download_thread.content_downloaded.connect(self.on_content_downloaded)

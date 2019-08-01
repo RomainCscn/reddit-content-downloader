@@ -259,7 +259,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>330</x>
@@ -276,7 +276,7 @@
          <item>
           <widget class="QPushButton" name="folderButton">
            <property name="text">
-            <string>Select download folder</string>
+            <string>Download folder destination</string>
            </property>
           </widget>
          </item>
@@ -296,7 +296,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QLabel" name="download_path">
+        <widget class="QLabel" name="download_path_text">
          <property name="text">
           <string/>
          </property>
