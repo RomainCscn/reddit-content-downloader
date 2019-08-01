@@ -72,12 +72,22 @@ class DownloadThread(QThread):
     self.download_folder = download_folder
     settings = QSettings('Romain Cascino', 'Reddit Content Downloader')
     self.reddit = praw.Reddit(client_id = settings.value('client_id', type=str),
-                     client_secret = settings.value('client_secret', type=str),
-                     user_agent = settings.value('user_agent', type=str))
+                      client_secret = settings.value('client_secret', type=str),
+                      user_agent = settings.value('user_agent', type=str),
+                      check_for_updates=False,
+                      comment_kind="t1",
+                      message_kind="t4",
+                      redditor_kind="t2",
+                      submission_kind="t3",
+                      subreddit_kind="t5",
+                      trophy_kind="t6",
+                      oauth_url="https://oauth.reddit.com",
+                      reddit_url="https://www.reddit.com",
+                      short_url="https://redd.it")
     QThread.__init__(self)
 
   def __del__(self):
-      self.wait()
+    self.wait()
 
   def run(self):
     self.download_content(self.subreddits, self.limit, self.top, self.download_folder)

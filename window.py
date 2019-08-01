@@ -11,6 +11,7 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
     super(MainWindowRcd, self).__init__(parent)
     self.setupUi(self)
     self.subs_not_found = []
+    self.download_folder = './download'
     self.subredditTableModel = SubredditTableModel([])
     self.treeViewSubs.setModel(self.subredditTableModel)
     self.treeViewSubs.selectionModel().selectionChanged.connect(self.on_treeViewSubs_selectionChanged)
@@ -45,8 +46,8 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
   
   @pyqtSlot()
   def on_folderButton_clicked(self):
-    self.file = str(QFileDialog.getExistingDirectory(self, "Select download directory"))
-    self.download_path.setText(self.file)
+    self.download_folder = str(QFileDialog.getExistingDirectory(self, "Select download directory"))
+    self.download_path.setText(self.download_folder)
 
   @pyqtSlot()
   def on_downloadButton_clicked(self):
@@ -59,12 +60,7 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
     if len(subreddits) == 0:
       QMessageBox.critical(self, "No subreddits", "You didn't enter any subreddits.", QMessageBox.Ok)
       return
-    if self.file:
-      download_folder = self.file 
-    else:
-      download_folder = './download'
-    print(download_folder)
-    self.download_thread = DownloadThread(subreddits, limit, top, download_folder)
+    self.download_thread = DownloadThread(subreddits, limit, top, self.download_folder)
     self.download_thread.content_downloaded.connect(self.on_content_downloaded)
     self.download_thread.sub_not_found.connect(self.on_sub_not_found)
     self.download_thread.config_error.connect(self.on_config_error)
