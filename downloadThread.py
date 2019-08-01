@@ -1,5 +1,6 @@
 import os
 import sys
+import traceback
 import argparse
 import praw
 import prawcore
@@ -8,18 +9,10 @@ import youtube_dl
 import urllib.request
 from pathlib import Path
 from PIL import Image
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, QSettings
 from PyQt5.QtWidgets import QMessageBox
 
-config = json.load(open('config/config.json', 'r'))
-reddit = praw.Reddit(client_id=config['clientId'],
-                     client_secret=config['clientSecret'],
-                     user_agent=config['userAgent'])
-
 TITLE_MAX_LENGHT = 200
-TIME_FILTER = ['all', 'day', 'hour', 'month', 'week', 'year']
-DEFAULT_LIMIT = 10
-DEFAULT_TIME_FILTER = 'all'
 
 class MyLogger(object):
   def debug(self, msg):
@@ -69,12 +62,17 @@ def remove_unexisting_images():
 class DownloadThread(QThread):
   content_downloaded = pyqtSignal(int)
   sub_not_found = pyqtSignal(str)
+  config_error = pyqtSignal()
   download_completed = pyqtSignal()
 
   def __init__(self, subreddits, limit, top):
     self.subreddits = subreddits
     self.limit = limit
     self.top = top
+    settings = QSettings('Romain Cascino', 'Reddit Content Downloader')
+    self.reddit = praw.Reddit(client_id = settings.value('client_id', type=str),
+                     client_secret = settings.value('client_secret', type=str),
+                     user_agent = settings.value('user_agent', type=str))
     QThread.__init__(self)
 
   def __del__(self):
@@ -90,7 +88,7 @@ class DownloadThread(QThread):
     create_download_folder()
     download_index = 0
     for subreddit in subreddits:
-      sub = reddit.subreddit(subreddit)
+      sub = self.reddit.subreddit(subreddit)
       try:
         for submission in sub.top(time, limit=limit):
           title = replace_reserved_characters(submission.title)
@@ -128,7 +126,13 @@ class DownloadThread(QThread):
         download_index = 0
         self.sub_not_found.emit(subreddit)
         print(f'=== Skipping r/{sub} as it does not exist ===')
+      except prawcore.exceptions.ResponseException:
+        download_index = 0
+        self.config_error.emit()
+        print(f'=== Oops, an error as occured. Please check your configuration values. ===')
+        return
       except:
         download_index = 0
         print(f'=== Oops, an unexpected error as occured... ===')
+        return
     self.download_completed.emit()
