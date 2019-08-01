@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QDialog, QFileDialog
 from ui_main_window_rcd import Ui_MainWindow
 from model import Subreddit, SubredditTableModel
 from settings_window import SettingsWindow
@@ -44,6 +44,11 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
       self.subredditTableModel.deleteSubreddit(subIndex)
   
   @pyqtSlot()
+  def on_folderButton_clicked(self):
+    self.file = str(QFileDialog.getExistingDirectory(self, "Select download directory"))
+    self.download_path.setText(self.file)
+
+  @pyqtSlot()
   def on_downloadButton_clicked(self):
     limit = self.limitSpinBox.value()
     if self.topComboBox.currentText().lower() == 'all time':
@@ -54,7 +59,12 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
     if len(subreddits) == 0:
       QMessageBox.critical(self, "No subreddits", "You didn't enter any subreddits.", QMessageBox.Ok)
       return
-    self.download_thread = DownloadThread(subreddits, limit, top)
+    if self.file:
+      download_folder = self.file 
+    else:
+      download_folder = './download'
+    print(download_folder)
+    self.download_thread = DownloadThread(subreddits, limit, top, download_folder)
     self.download_thread.content_downloaded.connect(self.on_content_downloaded)
     self.download_thread.sub_not_found.connect(self.on_sub_not_found)
     self.download_thread.config_error.connect(self.on_config_error)

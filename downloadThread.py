@@ -24,10 +24,10 @@ class MyLogger(object):
   def error(self, msg):
     pass
 
-def create_download_folder():
-  p = Path(f'./download')
+def create_download_folder(download_folder):
+  p = Path(download_folder)
   if not p.exists():
-    os.makedirs(f'./download')
+    os.makedirs(download_folder)
 
 def replace_reserved_characters(title):
   characters = (('<', ''), ('>', ''), (':', ''), ('r/', ''), ('/', ''), ('\\', ''), ('|', ''), ('*', ''), ('?', ''), ('%', ''))
@@ -51,8 +51,8 @@ def is_image(image):
     return False
   return True
 
-def remove_unexisting_images():
-  for directory in os.scandir('./download'): 
+def remove_unexisting_images(download_folder):
+  for directory in os.scandir(f'{download_folder}'): 
     if 'DS_Store' not in directory.path:
       for image in os.scandir(directory.path):
         if is_image(image.path) and is_image_similar('./empty_image', image.path):
@@ -65,10 +65,11 @@ class DownloadThread(QThread):
   config_error = pyqtSignal()
   download_completed = pyqtSignal()
 
-  def __init__(self, subreddits, limit, top):
+  def __init__(self, subreddits, limit, top, download_folder):
     self.subreddits = subreddits
     self.limit = limit
     self.top = top
+    self.download_folder = download_folder
     settings = QSettings('Romain Cascino', 'Reddit Content Downloader')
     self.reddit = praw.Reddit(client_id = settings.value('client_id', type=str),
                      client_secret = settings.value('client_secret', type=str),
@@ -79,13 +80,13 @@ class DownloadThread(QThread):
       self.wait()
 
   def run(self):
-    self.download_content(self.subreddits, self.limit, self.top)
+    self.download_content(self.subreddits, self.limit, self.top, self.download_folder)
 
   def done(self):
     print('done')
 
-  def download_content(self, subreddits, limit, time):
-    create_download_folder()
+  def download_content(self, subreddits, limit, time, download_folder):
+    create_download_folder(download_folder)
     download_index = 0
     for subreddit in subreddits:
       sub = self.reddit.subreddit(subreddit)
@@ -95,8 +96,7 @@ class DownloadThread(QThread):
           title = shorten_title(title)
 
           ydl_opts = {
-            'download_archive': 'downloaded.txt', 
-            'outtmpl': f'./download/{sub.display_name}/{title}.%(ext)s',
+            'outtmpl': f'{download_folder}/{sub.display_name}/{title}.%(ext)s',
             'logger': MyLogger(),
           }
           with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -109,9 +109,9 @@ class DownloadThread(QThread):
                 pass
               else:
                 print('Downloading image')
-                p = Path(f'./download/{sub.display_name}')
+                p = Path(f'{download_folder}/{sub.display_name}')
                 if not p.exists():
-                  os.makedirs(f'./download/{sub.display_name}')
+                  os.makedirs(f'{download_folder}/{sub.display_name}')
                 
                 url = submission.url
                 if 'i.imgur' not in url and 'imgur' in url:
@@ -119,7 +119,7 @@ class DownloadThread(QThread):
                   url += '.jpg'
                 
                 file_extension = url.split('.')[-1]
-                urllib.request.urlretrieve(url, f'./download/{sub.display_name}/{title}.{file_extension}')
+                urllib.request.urlretrieve(url, f'{download_folder}/{sub.display_name}/{title}.{file_extension}')
                 download_index += 1
                 self.content_downloaded.emit(download_index)
       except prawcore.exceptions.Redirect:
