@@ -69,14 +69,14 @@ class MainWindowRcd(QMainWindow, Ui_MainWindow):
     if not hasattr(self, 'download_folder') or self.download_folder == '':
       QMessageBox.critical(self, "No download folder", "You didn't select a download folder destination. Please select one before downloading.", QMessageBox.Ok)
       return
+    self.downloadButton.setEnabled(False)
+    self.cancelButton.setEnabled(True)
+    self.progressBar.setMaximum(len(subreddits) * limit)
     self.download_thread = DownloadThread(subreddits, limit, top, self.download_folder)
     self.download_thread.content_downloaded.connect(self.on_content_downloaded)
     self.download_thread.sub_not_found.connect(self.on_sub_not_found)
     self.download_thread.config_error.connect(self.on_config_error)
     self.download_thread.download_completed.connect(self.download_completed)
-    self.downloadButton.setEnabled(False)
-    self.cancelButton.setEnabled(True)
-    self.progressBar.setMaximum(len(subreddits) * limit)
     self.download_thread.finished.connect(self.download_finished)
     self.download_thread.start()
 
