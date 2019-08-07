@@ -4,5 +4,4 @@ config.json
 subreddits.json
 __pycache__/
 build/
-dist/
 start.spec
