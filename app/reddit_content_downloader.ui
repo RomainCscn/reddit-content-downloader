@@ -276,7 +276,7 @@
          <item>
           <widget class="QPushButton" name="folderButton">
            <property name="text">
-            <string>Download folder destination</string>
+            <string>Select destination folder</string>
            </property>
           </widget>
          </item>
@@ -452,7 +452,7 @@
   </action>
   <action name="menuActionSettings">
    <property name="text">
-    <string>Set api values</string>
+    <string>Set config values</string>
    </property>
   </action>
   <action name="actionTest">

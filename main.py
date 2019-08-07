@@ -9,7 +9,7 @@ import urllib.request
 from pathlib import Path
 from PIL import Image
 
-config = json.load(open('config/config.json', 'r'))
+config = json.load(open('./config/config.json', 'r'))
 reddit = praw.Reddit(client_id=config['clientId'],
                      client_secret=config['clientSecret'],
                      user_agent=config['userAgent'])
@@ -145,3 +145,5 @@ def main():
   download_content(subs, limit, time)
   remove_unexisting_images()
   print('=== Download finished, enjoy! ===')
+
+main()
